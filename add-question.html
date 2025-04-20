@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Question - SONAM Quiz App</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-100">
+  <div class="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+    <h2 class="text-2xl font-bold mb-4 text-center">Add New Question</h2>
+
+    <div class="space-y-4">
+      <input type="text" id="question" placeholder="Enter your question" class="w-full p-2 border rounded"/>
+
+      <input type="text" id="optionA" placeholder="Option A" class="w-full p-2 border rounded"/>
+      <input type="text" id="optionB" placeholder="Option B" class="w-full p-2 border rounded"/>
+      <input type="text" id="optionC" placeholder="Option C" class="w-full p-2 border rounded"/>
+      <input type="text" id="optionD" placeholder="Option D" class="w-full p-2 border rounded"/>
+
+      <select id="correctAnswer" class="w-full p-2 border rounded">
+        <option value="">Select Correct Option</option>
+        <option value="A">Option A</option>
+        <option value="B">Option B</option>
+        <option value="C">Option C</option>
+        <option value="D">Option D</option>
+      </select>
+
+      <button id="addBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full">Add Question</button>
+    </div>
+
+    <div id="status" class="mt-4 text-green-600 font-medium hidden">Question added!</div>
+  </div>
+
+  <script>
+    const addBtn = document.getElementById("addBtn");
+
+    addBtn.addEventListener("click", () => {
+      const questionText = document.getElementById("question").value.trim();
+      const optionA = document.getElementById("optionA").value.trim();
+      const optionB = document.getElementById("optionB").value.trim();
+      const optionC = document.getElementById("optionC").value.trim();
+      const optionD = document.getElementById("optionD").value.trim();
+      const correct = document.getElementById("correctAnswer").value;
+
+      if (!questionText || !optionA || !optionB || !optionC || !optionD || !correct) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const questionObj = {
+        question: questionText,
+        options: [optionA, optionB, optionC, optionD],
+        correctAnswer: correct // A/B/C/D
+      };
+
+      const existing = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+      existing.push(questionObj);
+      localStorage.setItem("quizQuestions", JSON.stringify(existing));
+
+      document.getElementById("status").classList.remove("hidden");
+      setTimeout(() => document.getElementById("status").classList.add("hidden"), 2000);
+
+      // Clear inputs
+      document.getElementById("question").value = "";
+      document.getElementById("optionA").value = "";
+      document.getElementById("optionB").value = "";
+      document.getElementById("optionC").value = "";
+      document.getElementById("optionD").value = "";
+      document.getElementById("correctAnswer").value = "";
+    });
+  </script>
+</body>
+</html>

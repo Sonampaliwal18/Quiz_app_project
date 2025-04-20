@@ -1,0 +1,90 @@
+<!-- Optionally for MCQ from DB or random -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Generate Quiz - SONAM Quiz App</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-100 py-6 px-4">
+  <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold mb-4 text-center">Generate MCQs from Text</h1>
+
+    <textarea id="textInput" placeholder="Paste or type your content here (max 5000 words)" rows="8" class="w-full p-3 border rounded mb-4"></textarea>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold">Number of Questions:</label>
+      <input type="number" id="questionCount" min="1" max="20" value="5" class="p-2 border rounded w-24"/>
+      <button id="generateBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Generate</button>
+    </div>
+
+    <div id="preview" class="mt-6"></div>
+  </div>
+
+  <script>
+    const generateBtn = document.getElementById("generateBtn");
+
+    function getRandomWords(arr, correct, count = 3) {
+      const filtered = arr.filter(w => w !== correct && w.length > 3);
+      const shuffled = filtered.sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+
+    function extractSentences(text) {
+      return text.match(/[^\.!\?]+[\.!\?]+/g) || [];
+    }
+
+    function generateMCQsFromText(text, count) {
+      const sentences = extractSentences(text).slice(0, count);
+      const allWords = text.split(/\s+/);
+      const questions = [];
+
+      for (let i = 0; i < sentences.length; i++) {
+        const sentence = sentences[i].trim();
+        const words = sentence.split(" ");
+        const keyword = words.find(w => w.length > 4) || words[0];
+        const questionText = sentence.replace(keyword, "______");
+        const incorrectOptions = getRandomWords(allWords, keyword);
+        const options = [...incorrectOptions, keyword].sort(() => 0.5 - Math.random());
+
+        questions.push({
+          question: questionText,
+          options,
+          correctAnswer: keyword
+        });
+      }
+
+      return questions;
+    }
+
+    generateBtn.addEventListener("click", () => {
+      const text = document.getElementById("textInput").value.trim();
+      const count = parseInt(document.getElementById("questionCount").value);
+
+      if (!text) return alert("Please enter some text.");
+      if (text.split(/\s+/).length > 5000) return alert("Text exceeds 5000 word limit.");
+      if (isNaN(count) || count <= 0) return alert("Please enter a valid number of questions.");
+
+      const questions = generateMCQsFromText(text, count);
+      localStorage.setItem("quizQuestions", JSON.stringify(questions));
+      displayPreview(questions);
+    });
+
+    function displayPreview(questions) {
+      const preview = document.getElementById("preview");
+      preview.innerHTML = `
+        <h2 class="text-xl font-semibold mb-2">Generated Questions:</h2>
+        ${questions.map((q, i) => `
+          <div class="mb-4">
+            <p class="font-medium">Q${i + 1}. ${q.question}</p>
+            <ul class="list-disc list-inside text-gray-700 mt-1">
+              ${q.options.map(opt => `<li>${opt}</li>`).join("")}
+            </ul>
+          </div>
+        `).join("")}
+      `;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!-- Quiz functionality will go here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz - SONAM Quiz App</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto px-4 py-6">
+    <header class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold">Quiz Time!</h1>
+      <div>
+        <span id="timer" class="text-lg font-semibold text-red-600">05:00</span>
+      </div>
+    </header>
+
+    <div class="bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
+      <div class="mb-4">
+        <div id="progressBar" class="h-4 bg-gray-300 rounded">
+          <div id="progress" class="h-4 bg-green-500 rounded" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div id="questionContainer" class="mb-4 text-lg font-medium text-gray-800"></div>
+      <div id="answerOptions" class="space-y-2"></div>
+
+      <button id="nextButton" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hidden">Next</button>
+    </div>
+  </div>
+
+  <script>
+    let questions = JSON.parse(localStorage.getItem('quizQuestions')) || [];
+    let currentQuestionIndex = 0;
+    let userAnswers = [];
+    let timeLeft = 300; // 5 minutes
+
+    if (questions.length === 0) {
+      alert("No questions found. Please add questions first.");
+      window.location.href = "add-question.html";
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function updateProgressBar() {
+      const progress = ((currentQuestionIndex) / questions.length) * 100;
+      document.getElementById("progress").style.width = `${progress}%`;
+    }
+
+    function startTimer() {
+      const timerElement = document.getElementById("timer");
+      const countdown = setInterval(() => {
+        if (timeLeft <= 0) {
+          clearInterval(countdown);
+          endQuiz();
+        } else {
+          timeLeft--;
+          const minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+          const seconds = String(timeLeft % 60).padStart(2, '0');
+          timerElement.textContent = `${minutes}:${seconds}`;
+        }
+      }, 1000);
+    }
+
+    function displayQuestion() {
+      const current = questions[currentQuestionIndex];
+      document.getElementById("questionContainer").textContent = `Q${currentQuestionIndex + 1}: ${current.question}`;
+
+      const shuffledOptions = [...current.options];
+      shuffle(shuffledOptions);
+
+      document.getElementById("answerOptions").innerHTML = shuffledOptions.map(option => `
+        <button class="block w-full px-4 py-2 bg-gray-100 hover:bg-blue-200 text-gray-800 rounded-md text-sm text-left border border-gray-300 transition" onclick="selectAnswer('${option}')">
+          ${option}
+        </button>
+      `).join("");
+
+      document.getElementById("nextButton").classList.add("hidden");
+      updateProgressBar();
+    }
+
+    function selectAnswer(selected) {
+      const correct = questions[currentQuestionIndex].options[questions[currentQuestionIndex].correctAnswer.charCodeAt(0) - 65];
+      userAnswers.push(selected === correct ? 1 : 0);
+      document.getElementById("nextButton").classList.remove("hidden");
+    }
+
+    document.getElementById("nextButton").addEventListener("click", () => {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        displayQuestion();
+      } else {
+        endQuiz();
+      }
+    });
+
+    function endQuiz() {
+      localStorage.setItem("quizScore", JSON.stringify(userAnswers));
+      window.location.href = "result.html";
+    }
+
+    // Start quiz
+    shuffle(questions); // Shuffle order of questions too
+    startTimer();
+    displayQuestion();
+  </script>
+</body>
+</html>
