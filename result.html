@@ -1,0 +1,41 @@
+<!-- Result display will go here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Result - SONAM Quiz App</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+    <h2 class="text-2xl font-bold mb-4">🎉 Quiz Completed!</h2>
+    
+    <div class="text-lg text-gray-700 mb-2" id="scoreText">Loading...</div>
+    <div class="text-3xl mt-2" id="emojiFeedback">🤔</div>
+
+    <button onclick="window.location.href='home.html'" class="mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Go to Home</button>
+  </div>
+
+  <script>
+    const scoreData = JSON.parse(localStorage.getItem("quizScore")) || [];
+    const total = scoreData.length;
+    const correct = scoreData.reduce((a, b) => a + b, 0);
+    const percentage = Math.round((correct / total) * 100);
+
+    const scoreText = document.getElementById("scoreText");
+    const emojiFeedback = document.getElementById("emojiFeedback");
+
+    scoreText.textContent = `You scored ${correct} out of ${total} (${percentage}%)`;
+
+    let emoji = "🤔";
+    if (percentage === 100) emoji = "🏆";
+    else if (percentage >= 80) emoji = "🎉";
+    else if (percentage >= 50) emoji = "🙂";
+    else if (percentage > 0) emoji = "😬";
+    else emoji = "😢";
+
+    emojiFeedback.textContent = emoji;
+  </script>
+</body>
+</html>
